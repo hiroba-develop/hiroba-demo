@@ -26,6 +26,7 @@ import {
   Menu,
   MenuItem,
   Stack,
+  Drawer,
 } from "@mui/material";
 
 import {
@@ -34,16 +35,17 @@ import {
   BarChart as BarChartIcon,
   Layers as LayersIcon,
   AccountCircle as AccountCircleIcon,
+  Menu as MenuIcon,
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
 
 // 定数の定義
 const MENU_ITEMS = [
-  { text: "ダッシュボード", icon: <DashboardIcon /> },
-  { text: "ユーザー", icon: <PeopleIcon /> },
-  { text: "レポート", icon: <BarChartIcon /> },
-  { text: "プロジェクト", icon: <LayersIcon /> },
+  { text: "ダッシュボード", icon: <DashboardIcon />, transition: "/dashboard" },
+  { text: "ユーザー", icon: <PeopleIcon />, transition: "/dashboard" },
+  { text: "レポート", icon: <BarChartIcon />, transition: "/dashboard" },
+  { text: "プロジェクト", icon: <LayersIcon />, transition: "/dashboard" },
 ];
 
 const CARD_DATA = [
@@ -125,31 +127,10 @@ const ActivityTable: React.FC = () => (
   </Paper>
 );
 
-// グラフプレースホルダーコンポーネント
-const PerformanceChartPlaceholder: React.FC = () => (
-  <Paper sx={{ p: 2 }}>
-    <Typography variant="h6" gutterBottom>
-      月間パフォーマンス
-    </Typography>
-    <Box
-      sx={{
-        height: 300,
-        bgcolor: "background.paper",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Typography variant="body1" color="textSecondary">
-        ここにグラフが表示されます
-      </Typography>
-    </Box>
-  </Paper>
-);
-
 // メインダッシュボードコンポーネント
 const Dashboard: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -164,6 +145,14 @@ const Dashboard: React.FC = () => {
     navigate("/");
   };
 
+  const handleMenuItems = (transition: string) => {
+    navigate(transition);
+  };
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -171,7 +160,21 @@ const Dashboard: React.FC = () => {
         {/* AppBar */}
         <AppBar position="fixed">
           <Toolbar>
-            <Typography variant="h6" noWrap component="div" sx={{ marginRight: 10 }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ display: { md: "none" }, mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ marginRight: 10 }}
+            >
               セカンドエリア
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
@@ -184,19 +187,31 @@ const Dashboard: React.FC = () => {
                 <List
                   sx={{ display: "flex", flexDirection: "row", padding: 0 }}
                 >
-                  {MENU_ITEMS.map(({ text, icon }) => (
+                  {MENU_ITEMS.map(({ text, icon, transition }) => (
                     <ListItem
                       key={text}
                       disablePadding
                       sx={{ width: "auto", mr: 2 }}
                     >
                       <ListItemButton>
-                        <ListItemIcon
-                          sx={{ color: "white", minWidth: "auto", mr: 1 }}
+                        <IconButton
+                          size="large"
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={() => handleMenuItems(transition)}
+                          color="inherit"
                         >
-                          {icon}
-                        </ListItemIcon>
-                        <ListItemText primary={text} sx={{ color: "white" }} />
+                          <ListItemIcon
+                            sx={{ color: "white", minWidth: "auto", mr: 1 }}
+                          >
+                            {icon}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={text}
+                            sx={{ color: "white" }}
+                          />
+                        </IconButton>
                       </ListItemButton>
                     </ListItem>
                   ))}
@@ -217,15 +232,7 @@ const Dashboard: React.FC = () => {
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
               keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
@@ -233,6 +240,34 @@ const Dashboard: React.FC = () => {
             </Menu>
           </Toolbar>
         </AppBar>
+
+        {/* ドロワー */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": { boxSizing: "border-box", width: 240 },
+          }}
+        >
+          <List>
+            {MENU_ITEMS.map(({ text, icon, transition }) => (
+              <ListItemButton>
+                <ListItem
+                  key={text}
+                  onClick={() => handleMenuItems(transition)}
+                >
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItem>
+              </ListItemButton>
+            ))}
+          </List>
+        </Drawer>
 
         {/* メインコンテンツ */}
         <Box
@@ -263,9 +298,6 @@ const Dashboard: React.FC = () => {
             <Stack direction="row" spacing={3}>
               <Box flex="1">
                 <ActivityTable />
-              </Box>
-              <Box flex="1">
-                <PerformanceChartPlaceholder />
               </Box>
             </Stack>
           </Stack>
