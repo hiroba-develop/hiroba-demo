@@ -58,7 +58,7 @@ function App() {
           width: "100vw", // 必要であれば変更
         }}
       >
-        <Card sx={{ width: "30%", boxShadow: 3 }}>
+        <Card sx={{ width: "60vh", boxShadow: 3 }}>
           <CardContent>
             <Typography
               variant="h5"
